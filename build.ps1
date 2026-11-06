@@ -21,11 +21,11 @@ Copy-Item "$wv\lib\net462\Microsoft.Web.WebView2.Core.dll", "$wv\lib\net462\Micr
 Invoke-WebRequest -UseBasicParsing "https://cdn.jsdelivr.net/npm/jszip@$JSZip/dist/jszip.min.js" -OutFile "$app\jszip.min.js"
 Invoke-WebRequest -UseBasicParsing "https://cdn.jsdelivr.net/npm/docx-preview@$DocxPreview/dist/docx-preview.min.js" -OutFile "$app\docx-preview.min.js"
 
-& $csc /nologo /codepage:65001 /target:winexe /platform:x64 /out:"$app\DocxViewer.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll `
+& $csc /nologo /codepage:65001 /target:winexe /win32icon:"$PSScriptRoot\src\app.ico" /platform:x64 /out:"$app\DocxViewer.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll `
     /r:"$app\Microsoft.Web.WebView2.Core.dll" /r:"$app\Microsoft.Web.WebView2.WinForms.dll" "$PSScriptRoot\src\DocxViewer.cs"
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
 $resources = Get-ChildItem $app -File | ForEach-Object { "/resource:$($_.FullName),$($_.Name)" }
-& $csc /nologo /codepage:65001 /target:winexe /out:"$dist\DocxViewer-Setup.exe" /r:System.Windows.Forms.dll $resources "$PSScriptRoot\src\Setup.cs"
+& $csc /nologo /codepage:65001 /target:winexe /win32icon:"$PSScriptRoot\src\app.ico" /out:"$dist\DocxViewer-Setup.exe" /r:System.Windows.Forms.dll $resources "$PSScriptRoot\src\Setup.cs"
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 Write-Host "Built $dist\DocxViewer-Setup.exe"

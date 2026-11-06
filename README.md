@@ -1,3 +1,5 @@
+<img src="docs/icon.png" width="96" align="right" alt="">
+
 # simple-docx
 
 A tiny Windows app for when you just want to quickly look at a `.docx` without waiting for Word.
@@ -10,7 +12,7 @@ A tiny Windows app for when you just want to quickly look at a `.docx` without w
 
 ## Install
 
-Run `DocxViewer-Setup.exe`. No admin rights needed. Uninstall from Settings > Apps.
+Download [DocxViewer-Setup.exe](https://github.com/Kuchizu/simple-docx/releases/latest/download/DocxViewer-Setup.exe) and run it. No admin rights needed. Uninstall from Settings > Apps.
 
 ## Build
 

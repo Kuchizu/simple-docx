@@ -70,6 +70,7 @@ static class Setup
         var prev = Get(Docx, "") as string;
         if (prev != null && prev != ProgId) Set(Own, "PrevDefault", prev);
         Set(@"Software\Classes\" + ProgId, "", "Документ Word");
+        Set(@"Software\Classes\" + ProgId + @"\DefaultIcon", "", Exe + ",0");
         Set(@"Software\Classes\" + ProgId + @"\shell\open\command", "", "\"" + Exe + "\" \"%1\"");
         Set(Docx, "", ProgId);
         Set(Docx + @"\OpenWithProgids", ProgId, "");
