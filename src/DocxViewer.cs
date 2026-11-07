@@ -10,8 +10,12 @@ static class DocxViewer
     static void Main(string[] args)
     {
         Application.EnableVisualStyles();
-        var form = new Form { Text = "DOCX Viewer", Width = 1000, Height = Math.Min(900, Screen.PrimaryScreen.WorkingArea.Height - 40), StartPosition = FormStartPosition.CenterScreen,
+        var form = new Form { Text = "DOCX Viewer", StartPosition = FormStartPosition.CenterScreen,
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath) };
+        float k;
+        using (var g = form.CreateGraphics()) k = g.DpiX / 96f;
+        form.Width = (int)(1000 * k);
+        form.Height = (int)Math.Min(900 * k, Screen.PrimaryScreen.WorkingArea.Height - 40 * k);
         var web = new WebView2 { Dock = DockStyle.Fill };
         form.Controls.Add(web);
         form.Load += async (s, e) =>
