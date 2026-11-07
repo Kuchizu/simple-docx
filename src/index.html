@@ -18,6 +18,15 @@
   #loading::before { content: ""; width: 40px; height: 40px; border: 4px solid #c4c8cf; border-top-color: #2f6fde;
                      border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  #pdf { position: fixed; top: 16px; left: 16px; z-index: 5; box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+  #pdf:disabled { opacity: .7; cursor: default; }
+  @media print {
+    @page { margin: 0; }
+    html, body { background: none; }
+    #hint, #loading, #pdf { display: none !important; }
+    .docx-wrapper { background: none !important; padding: 0 !important; display: block !important; }
+    .docx-wrapper > section.docx { box-shadow: none !important; margin: 0 !important; break-after: page; }
+  }
 </style>
 <style id="fonts"></style>
 </head>
@@ -27,6 +36,7 @@
   <button id="open">Открыть файл (Ctrl+O)</button>
 </div>
 <div id="loading" hidden></div>
+<button id="pdf" hidden title="Экспорт в PDF">PDF</button>
 <div id="doc"></div>
 <input type="file" id="pick" accept=".docx" hidden>
 <script src="jszip.min.js"></script>
@@ -41,6 +51,7 @@
 
   function fail(name, e) {
     loading(null);
+    $('pdf').hidden = true;
     $('doc').innerHTML = '';
     $('hint').hidden = false;
     $('msg').textContent = 'Не удалось открыть ' + name + ': ' + e.message;
@@ -103,12 +114,26 @@
       await document.fonts.ready;
       if (body) placeFloatingTables(body);
       $('hint').hidden = true;
+      $('pdf').hidden = false;
       loading(null);
       document.title = name + ' - DOCX Viewer';
+      fileName = name;
     } catch (e) {
       fail(name, e);
     }
   }
+
+  let fileName = '';
+  $('pdf').onclick = () => {
+    const page = document.querySelector('#doc section.docx');
+    $('pdf').disabled = true;
+    $('pdf').textContent = 'Сохраняю…';
+    chrome.webview.postMessage(['pdf', fileName, parseFloat(page.style.width), parseFloat(page.style.minHeight)].join('\n'));
+  };
+  window.chrome?.webview?.addEventListener('message', e => {
+    $('pdf').textContent = { saved: 'Сохранено', failed: 'Ошибка' }[e.data] || 'PDF';
+    setTimeout(() => { $('pdf').textContent = 'PDF'; $('pdf').disabled = false; }, e.data == 'cancel' ? 0 : 2000);
+  });
 
   $('open').onclick = () => $('pick').click();
   $('pick').onchange = e => e.target.files[0] && show(e.target.files[0], e.target.files[0].name);
