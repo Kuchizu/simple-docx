@@ -1,7 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $WebView2 = '1.0.4314.35'
-$DocxPreview = '0.4.1'
 $JSZip = '3.10.2'
 
 $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
@@ -19,7 +18,7 @@ $wv = "$obj\webview2"
 Copy-Item "$wv\lib\net462\Microsoft.Web.WebView2.Core.dll", "$wv\lib\net462\Microsoft.Web.WebView2.WinForms.dll",
     "$wv\runtimes\win-x64\native\WebView2Loader.dll", "$PSScriptRoot\src\index.html" $app
 Invoke-WebRequest -UseBasicParsing "https://cdn.jsdelivr.net/npm/jszip@$JSZip/dist/jszip.min.js" -OutFile "$app\jszip.min.js"
-Invoke-WebRequest -UseBasicParsing "https://cdn.jsdelivr.net/npm/docx-preview@$DocxPreview/dist/docx-preview.min.js" -OutFile "$app\docx-preview.min.js"
+Copy-Item "$PSScriptRoot\vendor\docx-preview.min.js" $app
 
 & $csc /nologo /codepage:65001 /target:winexe /win32icon:"$PSScriptRoot\src\app.ico" /win32manifest:"$PSScriptRoot\src\app.manifest" /platform:x64 /out:"$app\DocxViewer.exe" /r:System.Windows.Forms.dll /r:System.Drawing.dll `
     /r:"$app\Microsoft.Web.WebView2.Core.dll" /r:"$app\Microsoft.Web.WebView2.WinForms.dll" "$PSScriptRoot\src\DocxViewer.cs"

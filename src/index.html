@@ -12,6 +12,7 @@
   button { font: inherit; padding: 8px 18px; border: 0; border-radius: 6px; background: #2f6fde; color: #fff; cursor: pointer; }
   .docx-wrapper { background: #eceef1 !important; }
   .docx-wrapper > section.docx { box-shadow: 0 2px 12px rgba(0, 0, 0, .12) !important; }
+  .docx sup, .docx sub { line-height: 0; }
 </style>
 <style id="fonts"></style>
 </head>
@@ -83,7 +84,9 @@
       const zip = await JSZip.loadAsync(data);
       const [body, fonts] = await Promise.all([readXml(zip, 'word/document.xml'), readXml(zip, 'word/fontTable.xml')]);
       substituteFonts(fonts);
-      await docx.renderAsync(data, $('doc'));
+      const savedByWord = body?.getElementsByTagNameNS(W, 'lastRenderedPageBreak').length > 0;
+      await docx.renderAsync(data, $('doc'), null,
+        { experimental: true, ignoreLastRenderedPageBreak: !savedByWord, paginate: !savedByWord });
       await document.fonts.ready;
       if (body) placeFloatingTables(body);
       $('hint').hidden = true;

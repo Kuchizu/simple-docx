@@ -20,4 +20,4 @@ Download [DocxViewer-Setup.exe](https://github.com/Kuchizu/simple-docx/releases/
 powershell -ExecutionPolicy Bypass -File build.ps1
 ```
 
-Output: `dist\DocxViewer-Setup.exe`. Built with [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) and WebView2.
+Output: `dist\DocxViewer-Setup.exe`. Built with WebView2 and a patched [docx-preview](https://github.com/Kuchizu/docxjs/tree/simple-docx) bundled in `vendor/`.
