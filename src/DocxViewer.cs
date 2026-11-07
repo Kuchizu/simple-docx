@@ -10,7 +10,7 @@ static class DocxViewer
     static void Main(string[] args)
     {
         Application.EnableVisualStyles();
-        var form = new Form { Text = "DOCX Viewer", StartPosition = FormStartPosition.CenterScreen,
+        var form = new Form { Text = "DOCX Viewer", StartPosition = FormStartPosition.CenterScreen, WindowState = FormWindowState.Maximized,
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath) };
         float k;
         using (var g = form.CreateGraphics()) k = g.DpiX / 96f;
