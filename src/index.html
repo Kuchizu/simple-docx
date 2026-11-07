@@ -13,6 +13,11 @@
   .docx-wrapper { background: #eceef1 !important; }
   .docx-wrapper > section.docx { box-shadow: 0 2px 12px rgba(0, 0, 0, .12) !important; }
   .docx sup, .docx sub { line-height: 0; }
+  #loading { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center;
+             justify-content: center; gap: 16px; background: #eceef1; }
+  #loading::before { content: ""; width: 40px; height: 40px; border: 4px solid #c4c8cf; border-top-color: #2f6fde;
+                     border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <style id="fonts"></style>
 </head>
@@ -21,6 +26,7 @@
   <div id="msg">Перетащите .docx сюда</div>
   <button id="open">Открыть файл (Ctrl+O)</button>
 </div>
+<div id="loading" hidden></div>
 <div id="doc"></div>
 <input type="file" id="pick" accept=".docx" hidden>
 <script src="jszip.min.js"></script>
@@ -28,7 +34,13 @@
 <script>
   const $ = id => document.getElementById(id);
 
+  function loading(name) {
+    $('loading').textContent = name;
+    $('loading').hidden = !name;
+  }
+
   function fail(name, e) {
+    loading(null);
     $('doc').innerHTML = '';
     $('hint').hidden = false;
     $('msg').textContent = 'Не удалось открыть ' + name + ': ' + e.message;
@@ -80,6 +92,7 @@
   }
 
   async function show(data, name) {
+    loading(name);
     try {
       const zip = await JSZip.loadAsync(data);
       const [body, fonts] = await Promise.all([readXml(zip, 'word/document.xml'), readXml(zip, 'word/fontTable.xml')]);
@@ -90,6 +103,7 @@
       await document.fonts.ready;
       if (body) placeFloatingTables(body);
       $('hint').hidden = true;
+      loading(null);
       document.title = name + ' - DOCX Viewer';
     } catch (e) {
       fail(name, e);
@@ -112,9 +126,12 @@
   });
 
   const f = new URLSearchParams(location.search).get('f');
-  if (f) fetch('https://doc.local/' + encodeURIComponent(f))
-    .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error('HTTP ' + r.status)))
-    .then(b => show(b, f), e => fail(f, e));
+  if (f) {
+    loading(f);
+    fetch('https://doc.local/' + encodeURIComponent(f))
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(b => show(b, f), e => fail(f, e));
+  }
 </script>
 </body>
 </html>
