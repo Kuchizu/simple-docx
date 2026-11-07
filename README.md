@@ -1,6 +1,6 @@
-<img src="docs/icon.png" width="96" align="right" alt="">
+<p align="center"><img src="docs/icon.png" width="96" alt=""></p>
 
-# simple-docx
+<h1 align="center">simple-docx</h1>
 
 A tiny Windows app for when you just want to quickly look at a `.docx` without waiting for Word.
 
