@@ -13,6 +13,7 @@
   .docx-wrapper { background: #eceef1 !important; }
   .docx-wrapper > section.docx { box-shadow: 0 2px 12px rgba(0, 0, 0, .12) !important; }
 </style>
+<style id="fonts"></style>
 </head>
 <body>
 <div id="hint">
@@ -32,9 +33,59 @@
     $('msg').textContent = 'Не удалось открыть ' + name + ': ' + e.message;
   }
 
+  const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const ctx = document.createElement('canvas').getContext('2d');
+  const width = font => { ctx.font = '40px ' + font; return ctx.measureText('mmmwwwlliЖжы').width; };
+  const installed = name => ['serif', 'monospace'].some(g => width(JSON.stringify(name) + ', ' + g) !== width(g));
+  const generic = { roman: 'Times New Roman', modern: 'Courier New' };
+
+  async function readXml(zip, path) {
+    const f = zip.file(path);
+    return f && new DOMParser().parseFromString(await f.async('string'), 'application/xml');
+  }
+
+  // Word falls back to w:altName or the font family for missing fonts, browsers fall back to Times
+  function substituteFonts(table) {
+    const css = [];
+    for (const f of table ? table.getElementsByTagNameNS(W, 'font') : []) {
+      const name = f.getAttributeNS(W, 'name');
+      const val = tag => f.getElementsByTagNameNS(W, tag)[0]?.getAttributeNS(W, 'val');
+      if (!name || installed(name)) continue;
+      const alts = [val('altName'), generic[val('family')] || 'Arial'].filter(Boolean);
+      const bold = /bold|semi|demi|black|heavy/i.test(name);
+      const src = alts.flatMap(a => bold ? [a + ' Bold', a] : [a]).map(a => `local(${JSON.stringify(a)})`);
+      css.push(`@font-face { font-family: ${JSON.stringify(name)}; src: ${src.join(', ')}; }`);
+    }
+    $('fonts').textContent = css.join('\n');
+  }
+
+  // docx-preview turns w:tblpPr into float + "distance from text" margins and ignores tblpX/tblpY
+  function placeFloatingTables(xml) {
+    const pos = [...xml.getElementsByTagNameNS(W, 'tblpPr')];
+    const tables = [...$('doc').querySelectorAll('table')].filter(t => t.style.float === 'left');
+    if (pos.length !== tables.length) return;
+    tables.forEach((t, i) => {
+      const a = n => pos[i].getAttributeNS(W, n);
+      const page = t.closest('section'), ps = getComputedStyle(page), pr = page.getBoundingClientRect();
+      const shift = (prop, current, target) => t.style[prop] = parseFloat(getComputedStyle(t)[prop]) + target - current + 'px';
+      if (!a('tblpXSpec'))
+        shift('marginLeft', t.getBoundingClientRect().left - pr.left,
+          (+a('tblpX') || 0) / 15 + (a('horzAnchor') === 'page' ? 0 : parseFloat(ps.paddingLeft)));
+      const v = a('vertAnchor');
+      if (!a('tblpYSpec') && (v === 'page' || v === 'margin'))
+        shift('marginTop', t.getBoundingClientRect().top - pr.top,
+          (+a('tblpY') || 0) / 15 + (v === 'page' ? 0 : parseFloat(ps.paddingTop)));
+    });
+  }
+
   async function show(data, name) {
     try {
+      const zip = await JSZip.loadAsync(data);
+      const [body, fonts] = await Promise.all([readXml(zip, 'word/document.xml'), readXml(zip, 'word/fontTable.xml')]);
+      substituteFonts(fonts);
       await docx.renderAsync(data, $('doc'));
+      await document.fonts.ready;
+      if (body) placeFloatingTables(body);
       $('hint').hidden = true;
       document.title = name + ' - DOCX Viewer';
     } catch (e) {
