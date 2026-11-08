@@ -115,7 +115,7 @@
       substituteFonts(fonts);
       const savedByWord = body?.getElementsByTagNameNS(W, 'lastRenderedPageBreak').length > 0;
       await docx.renderAsync(data, $('doc'), null,
-        { experimental: true, ignoreLastRenderedPageBreak: !savedByWord, paginate: !savedByWord });
+        { experimental: true, ignoreLastRenderedPageBreak: !savedByWord, paginate: !savedByWord, renderAltChunks: false });
       await document.fonts.ready;
       if (body) placeFloatingTables(body);
       $('hint').hidden = true;

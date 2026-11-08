@@ -9,7 +9,7 @@ using Microsoft.Win32;
 
 static class Setup
 {
-    const string App = "DocxViewer", ProgId = "DocxViewer.docx", Title = "DOCX Viewer", Version = "1.3.0";
+    const string App = "DocxViewer", ProgId = "DocxViewer.docx", Title = "DOCX Viewer", Version = "1.3.1";
     const string Docx = @"Software\Classes\.docx", Own = @"Software\DocxViewer";
     const string Uninst = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\DocxViewer";
     static readonly string Dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", App);
