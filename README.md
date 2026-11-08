@@ -8,6 +8,8 @@
 
 ![DOCX Viewer opening a document](docs/demo.gif)
 
+![DOCX Viewer screenshot](docs/screenshot.png)
+
 - Double-click any `.docx`, drag and drop, or Ctrl+O
 - Pages, fonts, tables and footnotes laid out close to Word
 - Export to PDF in one click
