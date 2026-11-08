@@ -140,6 +140,13 @@
     setTimeout(() => { $('pdf').textContent = 'PDF'; $('pdf').disabled = false; }, e.data == 'cancel' ? 0 : 2000);
   });
 
+  $('doc').addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (!a || a.getAttribute('href').startsWith('#')) return;
+    e.preventDefault();
+    chrome.webview.postMessage('open\n' + a.href);
+  });
+
   $('open').onclick = () => $('pick').click();
   $('pick').onchange = e => e.target.files[0] && show(e.target.files[0], e.target.files[0].name);
   addEventListener('keydown', e => {

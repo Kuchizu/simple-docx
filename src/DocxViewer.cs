@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
@@ -7,6 +8,20 @@ using Microsoft.Web.WebView2.WinForms;
 
 static class DocxViewer
 {
+    static void OpenLink(string link)
+    {
+        Uri uri;
+        if (!Uri.TryCreate(link, UriKind.Absolute, out uri) || uri.Host == "app.local") return;
+        if (uri.Scheme != "http" && uri.Scheme != "https" && uri.Scheme != "mailto") return;
+        try
+        {
+            Process.Start(uri.AbsoluteUri);
+        }
+        catch (Exception)
+        {
+        }
+    }
+
     [STAThread]
     static void Main(string[] args)
     {
@@ -43,9 +58,16 @@ static class DocxViewer
                 url += "?f=" + Uri.EscapeDataString(Path.GetFileName(path));
             }
             core.DocumentTitleChanged += (s2, e2) => form.Text = core.DocumentTitle;
+            core.NavigationStarting += (s2, e2) => { if (!e2.Uri.StartsWith("https://app.local/")) e2.Cancel = true; };
+            core.NewWindowRequested += (s2, e2) => { e2.Handled = true; OpenLink(e2.Uri); };
             core.WebMessageReceived += async (s2, e2) =>
             {
                 var msg = e2.TryGetWebMessageAsString().Split('\n');
+                if (msg[0] == "open")
+                {
+                    OpenLink(msg[1]);
+                    return;
+                }
                 if (msg[0] != "pdf")
                 {
                     form.Close();
