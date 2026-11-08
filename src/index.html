@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="utf-8">
 <title>DOCX Viewer</title>
@@ -32,17 +32,22 @@
 </head>
 <body>
 <div id="hint">
-  <div id="msg">Перетащите .docx сюда</div>
-  <button id="open">Открыть файл (Ctrl+O)</button>
+  <div id="msg"></div>
+  <button id="open"></button>
 </div>
 <div id="loading" hidden></div>
-<button id="pdf" hidden title="Экспорт в PDF">PDF</button>
+<button id="pdf" hidden>PDF</button>
 <div id="doc"></div>
 <input type="file" id="pick" accept=".docx" hidden>
 <script src="jszip.min.js"></script>
 <script src="docx-preview.min.js"></script>
 <script>
   const $ = id => document.getElementById(id);
+  const t = (ru, en) => navigator.language.startsWith('ru') ? ru : en;
+  document.documentElement.lang = navigator.language;
+  $('msg').textContent = t('Перетащите .docx сюда', 'Drop a .docx file here');
+  $('open').textContent = t('Открыть файл (Ctrl+O)', 'Open file (Ctrl+O)');
+  $('pdf').title = t('Экспорт в PDF', 'Export to PDF');
 
   function loading(name) {
     $('loading').textContent = name;
@@ -54,7 +59,7 @@
     $('pdf').hidden = true;
     $('doc').innerHTML = '';
     $('hint').hidden = false;
-    $('msg').textContent = 'Не удалось открыть ' + name + ': ' + e.message;
+    $('msg').textContent = t('Не удалось открыть ', 'Could not open ') + name + ': ' + e.message;
   }
 
   const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
@@ -127,11 +132,11 @@
   $('pdf').onclick = () => {
     const page = document.querySelector('#doc section.docx');
     $('pdf').disabled = true;
-    $('pdf').textContent = 'Сохраняю…';
+    $('pdf').textContent = t('Сохраняю…', 'Saving…');
     chrome.webview.postMessage(['pdf', fileName, parseFloat(page.style.width), parseFloat(page.style.minHeight)].join('\n'));
   };
   window.chrome?.webview?.addEventListener('message', e => {
-    $('pdf').textContent = { saved: 'Сохранено', failed: 'Ошибка' }[e.data] || 'PDF';
+    $('pdf').textContent = { saved: t('Сохранено', 'Saved'), failed: t('Ошибка', 'Error') }[e.data] || 'PDF';
     setTimeout(() => { $('pdf').textContent = 'PDF'; $('pdf').disabled = false; }, e.data == 'cancel' ? 0 : 2000);
   });
 

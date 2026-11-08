@@ -27,7 +27,7 @@ static class DocxViewer
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Нужен Microsoft Edge WebView2 Runtime:\n" + ex.Message, "DOCX Viewer");
+                MessageBox.Show((CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? "Нужен" : "Requires") + " Microsoft Edge WebView2 Runtime:\n" + ex.Message, "DOCX Viewer");
                 form.Close();
                 return;
             }
